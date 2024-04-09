@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=app:create_app
+    depends_on:
+      - redis
+    command: gunicorn "app:create_app()" -b 0.0.0.0:5001
+
+  celery:
+    build: .
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+    command: celery -A app.tasks.celery worker --loglevel=info
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
